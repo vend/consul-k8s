@@ -20,6 +20,10 @@ GIT_DESCRIBE?=$(shell git describe --tags --always)
 GIT_IMPORT=github.com/hashicorp/consul-k8s/version
 GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY) -X $(GIT_IMPORT).GitDescribe=$(GIT_DESCRIBE)
 
+ifdef $$VEND_IMAGE
+VEND_IMAGE := $$VEND_IMAGE
+endif
+
 export GIT_COMMIT
 export GIT_DIRTY
 export GIT_DESCRIBE
@@ -109,6 +113,9 @@ clean:
 	@rm -rf \
 		$(CURDIR)/bin \
 		$(CURDIR)/pkg
+
+vend-build:
+	@docker build -t '$(VEND_IMAGE)' --build-arg 'NAME=consul-k8s' --build-arg 'GIT_COMMIT=$(GIT_COMMIT)' --build-arg 'GIT_DIRTY=$(GIT_DIRTY)' --build-arg 'GIT_DESCRIBE=$(GIT_DESCRIBE)' -f $(CURDIR)build-support/docker/Vend-Release.dockerfile $(CURDIR)
 
 
 .PHONY: all bin clean dev dist docker-images go-build-image test tools
